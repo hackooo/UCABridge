@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Script Management Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        body {
+            overflow-y: hidden;
+            background-color: #101010;
+            /* Dark background for a cyber look */
+            color: #fff;
+            /* Light text for contrast */
+        }
+
+        .menu-container {
+            width: 25%;
+            /* Menu width */
+            float: left;
+            /* Align menu to the left */
+            background-color: #222;
+            /* Slightly lighter than body for contrast */
+            height: 100vh;
+            /* Full height */
+            padding: 20px;
+        }
+        #mainContent {
+            height: 100vh;
+        }
+
+        .content-container {
+            width: 75%;
+            /* Content width */
+            float: right;
+            /* Align content to the right */
+            background-color: #181818;
+            /* Dark background for content */
+           
+            min-height: 100vh;
+            /* Ensure it takes full height */
+        }
+
+        .section-container {
+            display: none;
+            /* Hide all sections by default */
+            background-color: #282828;
+            /* Dark container for each section */
+            border: 1px solid #333;
+            /* Slight border for definition */
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, .5);
+            /* Stronger shadow for depth */
+            height: 100vh;
+        }
+
+        .navbar {
+            background-color: #333;
+        }
+
+        .navbar-brand,
+        .nav-link {
+            color: #9af;
+            /* Cyber blue links */
+        }
+        .section-container h2 {
+            margin-left: 0.2em;
+        }
+
+        .iframe-container {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #444;
+            /* Border for iframe */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="menu-container">
+        <!-- Dynamic content for menu items -->
+        <ul class="nav flex-column">
+            <li class="nav-item"><a class="nav-link" href="#manageScripts">Manage Scripts</a></li>
+            <li class="nav-item"><a class="nav-link" href="#viewLogs">View Logs</a></li>
+            <li class="nav-item"><a class="nav-link" href="#executeQuery">Execute Query</a></li>
+            <li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
+        </ul>
+    </div>
+    <div class="content-container">
+        <div id="mainContent" class="container">
+            {% if username %}
+            <section id="manageScripts" class="section-container">
+                <h2>Manage Scripts</h2>
+                <!-- iframe for Manage Scripts -->
+                <iframe src="/manage_service" class="iframe-container"></iframe>
+            </section>
+
+            <section id="viewLogs" class="hidden section-container">
+                <h2>View Logs</h2>
+                <!-- iframe for View Logs -->
+                <iframe src="/view_logs" class="iframe-container"></iframe>
+            </section>
+
+            <section id="executeQuery" class="hidden section-container">
+                <h2>Execute Query</h2>
+                <!-- iframe for Execute Query -->
+                <iframe src="/execute_query" class="iframe-container"></iframe>
+            </section>
+            {% else %}
+            <h1>Welcome! Please <a href="/login">login</a>.</h1>
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Show the first section on page load
+            $('#manageScripts').show(); // Assuming you want the 'Manage Scripts' section to be visible first
+
+            $('a[href^="#"]').on('click', function (e) {
+                e.preventDefault();
+                var target = $(this).attr('href');
+                $('.section-container').hide(); // Hide all sections
+                $(target).show(); // Show only the targeted section
+            });
+            $('a[href^="#"]').on('click', function (e) {
+                e.preventDefault();
+                var target = $(this).attr('href');
+                $('.section-container').hide(); // Hide all sections
+                $(target).show(); // Show only the targeted section
+            });
+        });
+    </script>
+</body>
+
+</html>

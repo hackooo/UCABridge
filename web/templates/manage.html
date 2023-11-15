@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Manage Services</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        .service-card {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, .1);
+        }
+
+        .service-header {
+            font-weight: bold;
+        }
+
+        .container {
+            margin-top: 2em;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <!-- Service Control Form -->
+        <!-- Service Control Form -->
+        <form action="/manage_service" method="post">
+            <div class="form-group">
+                <label for="service">Select Service:</label>
+                <select class="form-control" name="service" id="service">
+                    <option value="create_schemas">Create Schemas</option>
+                    <option value="servicenow">ServiceNow</option>
+                    <option value="splunk">Splunk</option>
+                    <option value="backup_db">Backup Database</option>
+                    <option value="generate_yaml">Create YAML</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="interval">Interval (minutes):</label>
+                <input type="number" class="form-control" name="interval" id="interval" value="1">
+            </div>
+            <button type="submit" class="btn btn-primary">Execute</button>
+        </form>
+
+        <!-- Service Status Section -->
+        <div id="activeServices">
+            <h2 class="mt-4">Active Services</h2>
+
+            <!-- ServiceNow Service Card -->
+            <div class="service-card" data-status="running" data-service="servicenow">
+                <div class="service-header">ServiceNow</div>
+                <p>Status: <span id="servicenowStatus">{{ servicenow_status }}</span></p>
+                <button class="btn btn-danger" onclick="stopService('servicenow')">Stop Service</button>
+            </div>
+
+            <!-- Splunk Service Card -->
+            <div class="service-card" data-status="running" data-service="splunk">
+                <div class="service-header">Splunk</div>
+                <p>Status: <span id="splunkStatus">{{ splunk_status }}</span></p>
+                <button class="btn btn-danger" onclick="stopService('splunk')">Stop Service</button>
+            </div>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                $('.service-card').each(function () {
+                    // Check if the status text includes 'Stopped'
+                    if ($(this).find('p span').text().includes('Stopped')) {
+                        $(this).hide(); // Hide the card if the service is stopped
+                    } else {
+                        $(this).show(); // Show the card otherwise
+                    }
+                });
+            });
+
+            function stopService(serviceName) {
+                $.ajax({
+                    url: '/manage_service',
+                    type: 'POST',
+                    data: { service: serviceName, action: 'stop' },
+                    success: function (response) {
+                        // Update the status and show/hide the service card based on the status
+                        $('#' + serviceName + 'Status').text('Stopped');
+                        $('[data-service="' + serviceName + '"]').hide(); // Hide the service card
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.error("Error stopping service:", serviceName, textStatus, errorThrown);
+                    }
+                });
+            }
+
+        </script>
+    </div>
+</body>
+
+</html>

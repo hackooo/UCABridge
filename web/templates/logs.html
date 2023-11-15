@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>View Logs</title>
+    <!-- Include Bootstrap CSS for styling -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        .container {
+            margin-top:2em;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <select id="logFileSelector" class="form-control mb-3">
+        <!-- Log files will be populated here by JavaScript -->
+    </select>
+    <div id="logContent" class="border rounded p-3" style="height: 500px; overflow-y: scroll;">
+        <!-- Log content will be displayed here -->
+    </div>
+</div>
+
+<script>
+    function populateLogFileSelector(files) {
+        const selector = document.getElementById('logFileSelector');
+        files.forEach(file => {
+            const option = document.createElement('option');
+            option.value = file;
+            option.textContent = file;
+            selector.appendChild(option);
+        });
+    }
+
+    function fetchAndDisplayLogs(logFile) {
+        fetch('/get_logs?log_file=' + logFile)
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('logContent');
+                container.innerHTML = ''; // Clear previous content
+                data.forEach(log => {
+                    const logEntry = document.createElement('pre');
+                    logEntry.textContent = JSON.stringify(log, null, 2);
+                    container.appendChild(logEntry);
+                });
+            })
+            .catch(error => console.error('Error fetching logs:', error));
+    }
+
+    // Event listener for log file selection
+    document.getElementById('logFileSelector').addEventListener('change', function() {
+        fetchAndDisplayLogs(this.value);
+    });
+
+    // Initialize the log file selector and display logs from the first file
+    fetch('/list_log_files')
+        .then(response => response.json())
+        .then(files => {
+            populateLogFileSelector(files);
+            if (files.length > 0) {
+                fetchAndDisplayLogs(files[0]);
+            }
+        })
+        .catch(error => console.error('Error listing log files:', error));
+</script>
+
+<!-- Include Bootstrap JS and its dependencies -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet"> <!-- Google Font -->
+    <title>SQL Query Results</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .container-fluid {
+            padding-top: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-control, .btn, .table {
+            border-radius: 0.25rem;
+        }
+        .btn-primary {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+        .btn-primary:hover {
+            background-color: #004085;
+            border-color: #003366;
+        }
+        .table {
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .table th {
+            background-color: #007bff;
+            color: #fff;
+        }
+        .scrollable-table {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .alert {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <form action="/execute_query" method="post" class="shadow-sm p-3 mb-5 bg-white rounded">
+            <!-- Dropdown for default queries -->
+            <div class="form-group">
+                <label for="defaultQueries">Default Queries:</label>
+                <select class="form-control" id="defaultQueries" onchange="updateQueryTextarea()">
+                    <option value="">Select a query...</option>
+                    {% for query in default_queries %}
+                        <option value="{{ query }}" {% if selected_query == query %}selected{% endif %}>{{ query }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="queryInput">SQL Query:</label>
+                <textarea class="form-control" id="queryInput" name="query" rows="3" required>{{ query }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Execute</button>
+        </form>
+        {% if error %}
+            <div class="alert alert-danger" role="alert">{{ error }}</div>
+        {% elif data %}
+            <h3>Results:</h3>
+            <input class="form-control mb-3" id="searchInput" type="text" placeholder="Search in table...">
+            <div class="table-responsive scrollable-table">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>{% for col in columns %}<th>{{ col }}</th>{% endfor %}</tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        {% for row in data %}
+                            <tr>{% for item in row %}<td>{{ item }}</td>{% endfor %}</tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    
+    <script>
+        function updateQueryTextarea() {
+            var selectedQuery = document.getElementById('defaultQueries').value;
+            document.getElementById('queryInput').value = selectedQuery;
+        }
+
+        document.getElementById('searchInput').addEventListener('keyup', function () {
+            var searchValue = this.value.toLowerCase();
+            var tableRows = document.getElementById('tableBody').getElementsByTagName('tr');
+
+            for (var i = 0; i < tableRows.length; i++) {
+                var currentRow = tableRows[i];
+                var textContent = currentRow.textContent.toLowerCase();
+                if (textContent.includes(searchValue)) {
+                    currentRow.style.display = '';
+                } else {
+                    currentRow.style.display = 'none';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+
