@@ -34,7 +34,25 @@ class ServiceNowAPI(APIBase):
                 ticket_info[endpoint] = {'table': table, 'index': index, 'fields': fields, 'unique_key': unique_key}
         return ticket_info
 
+    def create_field_mapping(self, endpoint_info):
+        fields_config = endpoint_info['fields'].split(', ')
+        field_mapping = {field.split(':')[0]: None for field in fields_config}
+        if endpoint_info['endpoint'] == 'sc_item_option':
+            for field in field_mapping.keys():
+                field_mapping[field] = 'item_option_new'
+        return field_mapping
 
+    def process_data(self, response, field_mapping):
+        processed_data = []
+        for record in response.get('result', []):
+            filtered_record = {}
+            for field, nested_key in field_mapping.items():
+                if nested_key and nested_key in record and field in record[nested_key]:
+                    filtered_record[field] = record[nested_key][field]
+                else:
+                    filtered_record[field] = record.get(field)
+            processed_data.append(filtered_record)
+        return processed_data
 
     def fetch_and_store_data(self, endpoint, sys_id=None):
 
@@ -45,6 +63,7 @@ class ServiceNowAPI(APIBase):
         # Retrieve configuration information for the specified endpoint
        # print(self.ticket_info[endpoint])
         info = self.ticket_info[endpoint]
+        field_mapping = self.create_field_mapping(info)
         groups = self.config.get('ServiceNow', 'groups')
         table = info['table']
         fields_key = f'servicenow_fields_{info["index"]}'
@@ -64,10 +83,12 @@ class ServiceNowAPI(APIBase):
        
         if endpoint == "sc_item_option" and sys_id:
             query_fields = ','.join(fields)
-            params = f'?sysparm_query=^!JOINsc_item_option.sys_id=sc_item_option_mtom.sc_item_option!^JOINsc_item_option_mtom.request_item=sc_req_item.sys_id!sys_id={sys_id}&sysparm_display_value=true&sysparm_fields={query_fields}'
+            params = f'?sysparm_query=^!JOINsc_item_option.sys_id=sc_item_option_mtom.sc_item_option!^JOINsc_item_option_mtom.request_item=sc_req_item.sys_id!sys_id={sys_id}&sysparm_display_value=true&sysparm_fields=item_option_new,value'
             api_endpoint = f"{self.config.get('ServiceNow', 'instance')}/table/{endpoint}{params}"
             # Make the API call and store the response
-            response = self.make_api_call(api_endpoint + params, auth=servicenow_auth)
+            response = self.make_api_call(api_endpoint, params=params, auth=servicenow_auth)
+            processed_data = self.process_data(response, field_mapping)
+            print(processed_data)
         elif endpoint == "sys_audit" and sys_id:
             fields = [item.replace('"', '') for item in fields]
             audit_params = {
