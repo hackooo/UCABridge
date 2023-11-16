@@ -46,11 +46,14 @@ class ServiceNowAPI(APIBase):
         processed_data = []
         for record in response.get('result', []):
             filtered_record = {}
-            for field, nested_key in field_mapping.items():
-                if nested_key and nested_key in record and field in record[nested_key]:
-                    filtered_record[field] = record[nested_key][field]
+            for config_field, nested_key in field_mapping.items():
+                # Extracting the value from the nested JSON structure
+                if nested_key:
+                    nested_value = record.get(nested_key, {})
+                    if isinstance(nested_value, dict) and config_field in nested_value:
+                        filtered_record[config_field] = nested_value[config_field]
                 else:
-                    filtered_record[field] = record.get(field)
+                    filtered_record[config_field] = record.get(config_field)
             processed_data.append(filtered_record)
         return processed_data
 
