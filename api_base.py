@@ -23,7 +23,7 @@ class APIBase:
             if https_proxy:
                 os.environ['HTTPS_PROXY'] = https_proxy
 
-    def make_api_call(self, endpoint, method='get', params=None, data=None, auth=None):
+    def make_api_call(self, endpoint, method='get', params=None, data=None, auth=None, header=None):
         # Make an API call to the specified endpoint
         try:
             # Choose the HTTP method (GET or POST) for the request
@@ -31,7 +31,7 @@ class APIBase:
                 response = requests.post(endpoint, params=params, data=data, auth=auth)
             else:
                 response = requests.get(endpoint, params=params, auth=auth)
-
+            print(response.request.url)
             # Raise an exception for HTTP error responses (e.g., 404, 500)
             response.raise_for_status()
 

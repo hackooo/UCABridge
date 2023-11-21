@@ -72,16 +72,46 @@
             border: 1px solid #444;
             /* Border for iframe */
         }
+        .menu-separator {
+            border-bottom: 1px solid #444; /* Add a subtle line for separation */
+            margin: 10px 0; /* Spacing above and below the separator */
+        }
     </style>
 </head>
 
 <body>
     <div class="menu-container">
         <!-- Dynamic content for menu items -->
+        <h3>Content Development</h3>
         <ul class="nav flex-column">
-            <li class="nav-item"><a class="nav-link" href="#manageScripts">Manage Scripts</a></li>
-            <li class="nav-item"><a class="nav-link" href="#viewLogs">View Logs</a></li>
-            <li class="nav-item"><a class="nav-link" href="#executeQuery">Execute Query</a></li>
+            Personal
+            <li class="nav-item"><a class="nav-link" href="#tasks">Tasks</a></li>
+            <li class="nav-item"><a class="nav-link" href="#notes">Notes</a></li>
+
+            <div class="menu-separator"></div>
+            Group
+            <li class="nav-item"><a class="nav-link" href="#groupTasks">Tasks</a></li>
+            <li class="nav-item"><a class="nav-link" href="#useCase">Use Case</a></li>
+            <li class="nav-item"><a class="nav-link" href="#deploymentTickets">Deployments</a></li>
+            <li class="nav-item"><a class="nav-link" href="#generatelYaml">YAML</a></li>
+            <li class="nav-item"><a class="nav-link" href="#forum">Confluence</a></li>
+
+            <div class="menu-separator"></div>
+            Database
+            <li class="nav-item"><a class="nav-link" href="#executeQuery">Explore</a></li>
+            <li class="nav-item"><a class="nav-link" href="#backup">Backup</a></li>
+
+            <div class="menu-separator"></div>
+            Bot
+            <li class="nav-item"><a class="nav-link" href="#manageScripts">Scripts</a></li>
+            <li class="nav-item"><a class="nav-link" href="#viewLogs">Logs</a></li>
+
+            <div class="menu-separator"></div>
+            Settings
+            <li class="nav-item"><a class="nav-link" href="#settings">Settings</a></li>
+
+            <div class="menu-separator"></div>
+            Web
             <li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
         </ul>
     </div>
@@ -101,9 +131,48 @@
             </section>
 
             <section id="executeQuery" class="hidden section-container">
-                <h2>Execute Query</h2>
+                <h2>Explore</h2>
                 <!-- iframe for Execute Query -->
                 <iframe src="/execute_query" class="iframe-container"></iframe>
+            </section>
+
+            <section id="deploymentTickets" class="hidden section-container">
+                <h2>Deployment</h2>
+                <!-- iframe for Execute Query -->
+                <iframe src="/deployment" class="iframe-container"></iframe>
+            </section>
+
+            <section id="tasks" class="hidden section-container">
+                <h2>Tasks</h2>
+                <!-- iframe for Execute Query -->
+                <iframe src="/tasks" class="iframe-container"></iframe>
+            </section>
+
+            <section id="settings" class="hidden section-container">
+                <h2>Settings</h2>
+                <!-- iframe for Execute Query -->
+                <iframe src="/settings" class="iframe-container"></iframe>
+            </section>
+
+            <section id="notes" class="hidden section-container">
+                <h2>Notes</h2>
+                <!-- iframe for Execute Query -->
+                <iframe src="/notes" class="iframe-container"></iframe>
+            </section>
+
+            <section id="generatelYaml" class="hidden section-container">
+                <h2>YAML</h2>
+                <!-- iframe for Execute Query -->
+                <iframe src="/yaml" class="iframe-container"></iframe>
+            </section>
+
+            <section id="groupTasks" class="hidden section-container">
+                <h2>Group Tasks</h2>
+                <!-- iframe for Execute Query -->
+                <iframe src="/group_tasks" class="iframe-container"></iframe>
+            </section>
+
+
             </section>
             {% else %}
             <h1>Welcome! Please <a href="/login">login</a>.</h1>

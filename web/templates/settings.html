@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Bootstrap CSS and Google Font -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <title>Configuration Settings</title>
+    <style>
+        .config-section {
+            margin-top: 2em;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .config-section h3 {
+            margin-bottom: 1em;
+        }
+        .submit-btn {
+            margin-top: 2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="my-4">Configuration Settings</h2>
+        <form action="/config" method="post">
+            {% for section in config.sections() %}
+            <div class="config-section">
+                <h3>{{ section }}</h3>
+                {% for option in config.options(section) %}
+                <div class="form-group">
+                    <label for="{{ section }}.{{ option }}">{{ option.replace('_', ' ').title() }}</label>
+                    <input type="text" class="form-control" id="{{ section }}.{{ option }}" name="{{ section }}.{{ option }}" value="{{ config.get(section, option) }}">
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+            <button style="margin-bottom:3em;" type="submit" class="btn btn-primary submit-btn">Save Changes</button>
+        </form>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>

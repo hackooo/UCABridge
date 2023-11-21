@@ -11,9 +11,9 @@ import time
 config = Config('settings.cfg')
 logger = Logger()
 database = Database(config, logger)
-schema_creator = SchemaCreator(config, logger)
 
 def create_schemas():
+    schema_creator = SchemaCreator(config, logger)
     schema_creator.create_schemas()
 
 def servicenow():
@@ -32,7 +32,8 @@ def backup_db():
 
 def generate_yaml():
     yaml_job = Yaml(config, logger)
-    yaml_job.generate_yaml_files()
+    return yaml_job.generate_yaml_files()
+
 
 
 def run_web():
@@ -52,7 +53,6 @@ def schedule_service(service_function, service_name, interval_minutes=1):
     def run_task():
         print()
         while service_name in scheduled_services:
-            print(service_name)
             try:
                 logger.info(f"Executing service: {service_name}")
                 service_function()

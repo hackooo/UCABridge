@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>Task Management</title>
+</head>
+<body>
+    <div class="container mt-4">
+        <h2 class="mb-4">Assigned Tasks for {{ username }}</h2>
+
+        <div class="row">
+            {% for task in tasks %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <!-- Adjusted to use dictionary keys -->
+                        <h5 class="card-title">{{ task['name'] }}</h5>
+                        <p class="card-text">{{ task['description'] }}</p>
+
+                        <form action="/update_task" method="post">
+                            <!-- Adjusted to use dictionary keys -->
+                            <input type="hidden" name="sys_id" value="{{ task['sys_id'] }}">
+                        
+                            <!-- State Update Dropdown -->
+                            <div class="form-group">
+                                <label for="state-{{ task['sys_id'] }}">State:</label>
+                                <select class="form-control" name="state" id="state-{{ task['sys_id'] }}">
+                                    {% for state in snow_states %}
+                                    <option value="1" {% if state == task['state'] %}selected{% endif %}>{{ state }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <!-- Work Notes Text Area -->
+                            <div class="form-group">
+                                <label for="work_notes">Work Notes:</label>
+                                <textarea class="form-control" name="work_notes" id="work_notes" rows="3">{{ task['work_notes'] }}</textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Update Task</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and Dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.9/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

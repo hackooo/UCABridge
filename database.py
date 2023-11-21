@@ -50,26 +50,36 @@ class Database:
             self.conn.rollback()
 
 
-    def view_data(self, table, fields, conditions=None):
-        # Prepare columns for the SQL SELECT query
-        fields = [item.replace('"', '') for item in fields]
-        columns = [sql.Identifier(field) for field in fields]
+    def view_data(self, table, fields, conditions=None, join=None):
+        # Splitting the table and column names
+        columns = [sql.SQL("{}.{}").format(sql.Identifier(field.split('.')[0]), sql.Identifier(field.split('.')[1])) if '.' in field else sql.Identifier(field) for field in fields]
 
         # Construct the basic SQL query for selecting data
         query = sql.SQL("SELECT {} FROM {}").format(sql.SQL(', ').join(columns), sql.Identifier(table))
+        
+        # Add JOIN clause if provided
+        if join:
+            query = sql.SQL("{} {}").format(query, sql.SQL(join))
 
         # Add conditions to the query if any
         if conditions:
             condition_statements = [sql.SQL("{} = %s").format(sql.Identifier(key)) for key in conditions]
+
             query = sql.SQL("{} WHERE {}").format(query, sql.SQL(' AND ').join(condition_statements))
 
         # Execute the query and return the results
         try:
             with self.conn.cursor() as cursor:
+             #   print(conditions)
                 cursor.execute(query, list(conditions.values()) if conditions else None)
-                return cursor.fetchall()
+                # Fetch column names
+                col_names = [desc[0] for desc in cursor.description]
+                # Fetch all rows and convert each row to a dictionary
+                rows = cursor.fetchall()
+                result = [dict(zip(col_names, row)) for row in rows]
+                print(f"rows: {rows}")
+                return result
         except psycopg2.DatabaseError as e:
-            # Log any errors during the select operation
             self.logger.error(f"Error during select operation: {e}")
             return None
 
@@ -151,7 +161,7 @@ class Database:
             conflict_target,
             set_clause
         )
-
+        print(query)
         # Execute the upsert query and handle any exceptions
         try:
             with self.conn.cursor() as cursor:
@@ -193,14 +203,15 @@ class Database:
             """ Insert a test account into the users table """
             try:
                 # Read test account details from the configuration
+                test_name = self.config.get('TestAccount', 'name')
                 test_username = self.config.get('TestAccount', 'username')
                 test_password = self.config.get('TestAccount', 'password')
-
+                test_group = self.config.get('TestAccount', 'group_id')
                 with self.conn.cursor() as cursor:
                     # Insert a test account
                     cursor.execute(
-                        "INSERT INTO users(username, password) VALUES(%s, %s) ON CONFLICT (username) DO NOTHING",
-                        (test_username, test_password)
+                        "INSERT INTO users(username, password, name, group_id) VALUES(%s, %s, %s, %s) ON CONFLICT (username) DO NOTHING",
+                        (test_username, test_password, test_name, test_group)
                     )
                     self.conn.commit()
                     self.logger.info("Test account inserted or already exists in the users table.")
@@ -216,7 +227,9 @@ class Database:
                     CREATE TABLE IF NOT EXISTS users (
                         id SERIAL PRIMARY KEY,
                         username VARCHAR(255) UNIQUE NOT NULL,
-                        password VARCHAR(255) NOT NULL
+                        password VARCHAR(255) NOT NULL,
+                        name VARCHAR(255) UNIQUE NOT NULL,
+                        group_id VARCHAR(255) UNIQUE NOT NULL      
                     );
                 """)
                 self.conn.commit()
@@ -252,3 +265,18 @@ class Database:
                         query = sql.SQL("SELECT * FROM {}").format(sql.Identifier(value)).as_string(self.conn)
                         default_queries.append(query)
             return default_queries
+    
+
+    def update_task(self, sys_id, new_state, new_work_notes):
+        update_query = """
+        UPDATE snow_tasks
+        SET state = %s, work_notes = %s
+        WHERE sys_id = %s
+        """
+        try:
+            with self.conn.cursor() as cursor:
+                cursor.execute(update_query, (new_state, new_work_notes, sys_id))
+                self.conn.commit()
+        except psycopg2.DatabaseError as e:
+            self.logger.error(f"Error in update_task: {e}")
+            self.conn.rollback()

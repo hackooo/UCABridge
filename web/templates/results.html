@@ -47,26 +47,44 @@
 </head>
 <body>
     <div class="container-fluid">
-        <form action="/execute_query" method="post" class="shadow-sm p-3 mb-5 bg-white rounded">
-            <!-- Dropdown for default queries -->
-            <div class="form-group">
-                <label for="defaultQueries">Default Queries:</label>
-                <select class="form-control" id="defaultQueries" onchange="updateQueryTextarea()">
-                    <option value="">Select a query...</option>
-                    {% for query in default_queries %}
-                        <option value="{{ query }}" {% if selected_query == query %}selected{% endif %}>{{ query }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="queryInput">SQL Query:</label>
-                <textarea class="form-control" id="queryInput" name="query" rows="3" required>{{ query }}</textarea>
-            </div>
-            <button type="submit" class="btn btn-primary">Execute</button>
-        </form>
-        {% if error %}
-            <div class="alert alert-danger" role="alert">{{ error }}</div>
-        {% elif data %}
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="execute-tab" data-toggle="tab" href="#execute" role="tab" aria-controls="execute" aria-selected="true">Select Query</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="clear-tab" data-toggle="tab" href="#clear" role="tab" aria-controls="clear" aria-selected="false">Clear Tables</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="remove-tab" data-toggle="tab" href="#remove" role="tab" aria-controls="remove" aria-selected="false">Remove Tables</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="create-schema-tab" data-toggle="tab" href="#createSchema" role="tab" aria-controls="createSchema" aria-selected="false">Create Schema</a>
+            </li>
+        </ul>
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="execute" role="tabpanel" aria-labelledby="execute-tab">
+                <!-- SQL Query Execution Form -->
+                <form action="/execute_query" method="post" class="shadow-sm p-3 mb-5 bg-white rounded">
+                    <!-- Dropdown for default queries -->
+                    <div class="form-group">
+                        <label for="defaultQueries">Default Queries:</label>
+                        <select class="form-control" id="defaultQueries" onchange="updateQueryTextarea()">
+                            <option value="">Select a query...</option>
+                            {% for query in default_queries %}
+                                <option value="{{ query }}" {% if selected_query == query %}selected{% endif %}>{{ query }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="queryInput">SQL Query:</label>
+                        <textarea class="form-control" id="queryInput" name="query" rows="3" required>{{ query }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Execute</button>
+                </form>
+                <!-- Display Results -->
+                {% if error %}
+                    <div class="alert alert-danger" role="alert">{{ error }}</div>
+                {% elif data %}
             <h3>Results:</h3>
             <input class="form-control mb-3" id="searchInput" type="text" placeholder="Search in table...">
             <div class="table-responsive scrollable-table">
@@ -83,6 +101,45 @@
             </div>
         {% endif %}
     </div>
+    <div class="tab-pane fade" id="clear" role="tabpanel" aria-labelledby="clear-tab">
+        <!-- Form for clearing tables -->
+        <form action="/clear_table" method="post" class="shadow-sm p-3 mb-5 bg-white rounded">
+            <div class="form-group">
+                <label for="tableSelect">Select Table to Clear:</label>
+                <select class="form-control" id="tableSelect" name="tableName">
+                    <option value="">Select a table...</option>
+                    {% for table in table_list %}
+                        <option value="{{ table }}">{{ table }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Clear Table</button>
+        </form>
+    </div>
+    <div class="tab-pane fade" id="remove" role="tabpanel" aria-labelledby="remove-tab">
+        <!-- Form for removing tables -->
+        <form action="/remove_table" method="post" class="shadow-sm p-3 mb-5 bg-white rounded">
+            <div class="form-group">
+                <label for="tableSelect">Select Table to Remove:</label>
+                <select class="form-control" id="tableSelect" name="tableName">
+                    <option value="">Select a table...</option>
+                    {% for table in table_list %}
+                        <option value="{{ table }}">{{ table }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Remove Table</button>
+        </form>
+    </div>
+
+    <div class="tab-pane fade" id="createSchema" role="tabpanel" aria-labelledby="create-schema-tab">
+        <!-- Form for creating schema -->
+        <form action="/create_schema" method="post" class="shadow-sm p-3 mb-5 bg-white rounded">
+            <button type="submit" class="btn btn-primary">Create Schema</button>
+        </form>
+    </div>
+</div>
+</div>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>Notes Management</title>
+</head>
+<body>
+    <div class="container mt-4">
+        <h2>Notes Management</h2>
+
+        <!-- Form for Adding or Updating Notes -->
+        <form action="/submit_note" method="post">
+            <div class="form-group">
+                <label for="uc_id">UC ID:</label>
+                <input type="text" class="form-control" name="uc_id" id="uc_id" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea class="form-control" name="description" id="description" rows="3" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit Note</button>
+        </form>
+
+        <hr>
+
+        <h3>Existing Notes</h3>
+        <div id="notes-list">
+            {% for note in notes %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">UC ID: {{ note['uc_id'] }}</h5>
+                    <p class="card-text">{{ note['description'] }}</p>
+                    <p class="card-text"><small class="text-muted">Submitted by: {{ note['username'] }}</small></p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+    <!-- Bootstrap JS and Dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.9/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

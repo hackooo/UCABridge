@@ -13,9 +13,11 @@ class SchemaCreator:
 
     def create_schemas(self):
         # Create schemas for ServiceNow and Splunk, and potentially other services
+        print('wowo')
         self.create_dynamic_schemas('ServiceNow')
         self.create_dynamic_schemas('Splunk')
         self.create_dynamic_schemas('Yaml')
+        self.create_dynamic_schemas('Notes')
         self.database.create_users_table()
         self.database.insert_test_account()
         # Additional services can be added here

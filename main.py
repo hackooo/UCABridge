@@ -18,7 +18,7 @@ def main():
     args = parser.parse_args()
 
     if args.command in services:
-        if args.command == 'web':  # Web service should run immediately without scheduling
+        if args.command == 'web' or args.command == 'create_schemas':  # Web service should run immediately without scheduling
             services[args.command]()
         else:
             schedule_service(services[args.command], args.interval)

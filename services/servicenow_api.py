@@ -15,6 +15,9 @@ class ServiceNowAPI(APIBase):
 
         # Log that the ServiceNow API has been initialized
         self.logger.info("ServiceNowAPI initialized")
+        
+        # Set up ServiceNow authentication credentials
+        self.servicenow_auth = (self.config.get('ServiceNow', 'user'), self.config.get('ServiceNow', 'password'))
 
     def _extract_ticket_info(self):
         self.logger.info("Extracting ticket information from ServiceNow configuration")
@@ -46,14 +49,11 @@ class ServiceNowAPI(APIBase):
         processed_data = []
         for record in response.get('result', []):
             filtered_record = {}
-            for config_field, nested_key in field_mapping.items():
-                # Extracting the value from the nested JSON structure
-                if nested_key:
-                    nested_value = record.get(nested_key, {})
-                    if isinstance(nested_value, dict) and config_field in nested_value:
-                        filtered_record[config_field] = nested_value[config_field]
+            for field, nested_key in field_mapping.items():
+                if nested_key and nested_key in record and field in record[nested_key]:
+                    filtered_record[field] = record[nested_key][field]
                 else:
-                    filtered_record[config_field] = record.get(config_field)
+                    filtered_record[field] = record.get(field)
             processed_data.append(filtered_record)
         return processed_data
 
@@ -81,15 +81,14 @@ class ServiceNowAPI(APIBase):
             self.logger.error(f"Error fetching unique key: {e}")
             unique_key = None
 
-        # Set up ServiceNow authentication credentials
-        servicenow_auth = (self.config.get('ServiceNow', 'user'), self.config.get('ServiceNow', 'password'))
+
        
         if endpoint == "sc_item_option" and sys_id:
             query_fields = ','.join(fields)
             params = f'?sysparm_query=^!JOINsc_item_option.sys_id=sc_item_option_mtom.sc_item_option!^JOINsc_item_option_mtom.request_item=sc_req_item.sys_id!sys_id={sys_id}&sysparm_display_value=true&sysparm_fields=item_option_new,value'
             api_endpoint = f"{self.config.get('ServiceNow', 'instance')}/table/{endpoint}{params}"
             # Make the API call and store the response
-            response = self.make_api_call(api_endpoint, params=params, auth=servicenow_auth)
+            response = self.make_api_call(api_endpoint, params=params, auth=self.servicenow_auth)
             processed_data = self.process_data(response, field_mapping)
             print(processed_data)
         elif endpoint == "sys_audit" and sys_id:
@@ -99,7 +98,7 @@ class ServiceNowAPI(APIBase):
             'sysparm_fields': ','.join(fields)
             }
             audit_endpoint = f"{self.config.get('ServiceNow', 'instance')}/api/now/table/{endpoint}"
-            response = self.make_api_call(audit_endpoint, params=audit_params, auth=servicenow_auth)
+            response = self.make_api_call(audit_endpoint, params=audit_params, auth=self.servicenow_auth)
             
         elif endpoint == "sys_journal_field" and sys_id:
             journal_params = {
@@ -107,7 +106,7 @@ class ServiceNowAPI(APIBase):
                         'sysparm_fields': ','.join(fields)
                     }
             journal_endpoint = f"{self.config.get('ServiceNow', 'instance')}/api/now/table/{endpoint}"
-            response = self.make_api_call(journal_endpoint, params=journal_params, auth=servicenow_auth)
+            response = self.make_api_call(journal_endpoint, params=journal_params, auth=self.servicenow_auth)
 
         elif endpoint == "sys_history_line" and sys_id:
             history_params = {
@@ -116,14 +115,14 @@ class ServiceNowAPI(APIBase):
                         }
             
             history_endpoint  = f"{self.config.get('ServiceNow', 'instance')}/api/now/table/{endpoint}/"
-            response = self.make_api_call(history_endpoint, params=history_params, auth=servicenow_auth)
+            response = self.make_api_call(history_endpoint, params=history_params, auth=self.servicenow_auth)
 
         else:
             # Build the API endpoint URL for the ServiceNow table
             api_endpoint = f"{self.config.get('ServiceNow', 'instance')}/api/now/table/{endpoint}"
             default_params = {'sysparm_query': f'assignment_group={groups}','sysparm_fields': ','.join(fields)}
           #  default_params = {'sysparm_fields': ','.join(fields)}
-            response = self.make_api_call(api_endpoint, params=default_params, auth=servicenow_auth)
+            response = self.make_api_call(api_endpoint, params=default_params, auth=self.servicenow_auth)
 
         if response and 'result' in response:
             for record in response['result']:
@@ -170,3 +169,27 @@ class ServiceNowAPI(APIBase):
                 return None
         return None
 
+
+    def update_service_now_task(self, sys_id, new_state, new_work_notes):
+            # Construct the ServiceNow API endpoint for updating a task
+            api_endpoint = f"{self.config.get('ServiceNow', 'instance')}/api/now/table/sc_task/{sys_id}"
+
+            # Payload for the update
+            payload = {
+                'sc_task.state': new_state
+            }
+            print(payload)
+            update_params = {
+            'sysparm_display_value':'true',
+            'u_change_request': f'{sys_id}'
+            }
+            # Headers to simulate the PATCH method using POST
+            headers = {
+            'Content-Type': 'application/json',
+            'X-HTTP-Method-Override': 'PATCH'
+            }
+        #    audit_endpoint = f"{self.config.get('ServiceNow', 'instance')}/api/now/table/{endpoint}"
+            # Make the API call
+            response = self.make_api_call(api_endpoint,  method='PUT', data=payload, auth=self.servicenow_auth)
+            # Handle the response (logging, error handling etc.)
+            print(f"snow api response update: {response}")

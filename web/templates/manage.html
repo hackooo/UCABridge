@@ -20,6 +20,9 @@
 
         .container {
             margin-top: 2em;
+            margin-right:0 !important;
+            margin-left:0 !important;
+            max-width:100%;
         }
     </style>
 </head>
@@ -33,11 +36,10 @@
             <div class="form-group">
                 <label for="service">Select Service:</label>
                 <select class="form-control" name="service" id="service">
-                    <option value="create_schemas">Create Schemas</option>
-                    <option value="servicenow">ServiceNow</option>
+                    <option value="create_schemas">Create Database Schemas</option>
+                    <option value="servicenow">Service Now</option>
                     <option value="splunk">Splunk</option>
                     <option value="backup_db">Backup Database</option>
-                    <option value="generate_yaml">Create YAML</option>
                 </select>
             </div>
             <div class="form-group">

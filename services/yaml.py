@@ -47,7 +47,7 @@ class Yaml():
 
             # Fetch data from the table
             results = self.database.view_data(table, fields)
-
+           # print(f"results: {results}")
 
             for row in results:
                 # Convert the row to a dictionary
